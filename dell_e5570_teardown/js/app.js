@@ -1,4 +1,4 @@
-/**    || upd || v1.0.3 || FourSoda8545 || cuerpo base ||    **/
+/**    || upd || v1.0.3 || FourSoda8545 || Pendientes docs, act, fix web ||    **/
 
 import * as THREE from 'three';
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
