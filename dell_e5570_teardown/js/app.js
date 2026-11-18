@@ -1,12 +1,8 @@
-
+/**    || upd || v1.0.3 || FourSoda8545 || cuerpo base ||    **/
 
 import * as THREE from 'three';
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 
-/**
- * CATÁLOGO DE EQUIPOS (Arquitectura multi-modelo escalable).
- * Permite buscar cualquier laptop en el buscador superior y reconstruir sus tornillos y piezas.
- */
 const CATALOG_DB = {
   'dell-e5570': {
     modelName: 'DELL LATITUDE E5570 (15.6" Skylake)',
@@ -15,29 +11,25 @@ const CATALOG_DB = {
   'dell-e5470': {
     modelName: 'DELL LATITUDE E5470 (14.0" Compact)',
     chassisScale: { x: 0.88, y: 1, z: 0.92 }
-  },
-  'thinkpad-t480': {
-    modelName: 'LENOVO THINKPAD T480 (14.0" Corporate)',
-    chassisScale: { x: 0.9, y: 0.95, z: 0.94 }
   }
 };
 
 /**
- * ESPECIFICACIONES DE CAPAS + COORDENADAS EXACTAS DE CADA TORNILLO 3D (`screwCoords`)
- * Cada coordenada {x, y, z} es relativa al centro del módulo para posicionar el tornillo Phillips 3D.
+ * BASE DE DATOS TÉCNICA - CORRECCIÓN DE VECTORES DE EXPLOSIÓN (EVITA TRASLAPES)
+ * Cada capa tiene una altura Y independiente y vectores de separación ortogonales limpios.
  */
 const HARDWARE_DB = [
   {
     id: 'bottom_case',
     fru: 'DP/N: 07PKT1',
     name: 'Tapa Inferior del Chasis (Bottom Case)',
-    subtitle: 'Cubierta inferior con 8 tornillos cautivos Phillips M2.5x5',
-    screws: '8x Tornillos cautivos Phillips M2.5x5 (Perímetro y centro)',
+    subtitle: 'Cubierta inferior con 8 tornillos cautivos M2.5x5',
+    screws: '8x Tornillos cautivos Phillips M2.5x5',
     stage: 'ETAPA 01',
-    basePos: { x: 0, y: 1.05, z: 0 },
-    explodeVec: { x: 0, y: 6.4, z: -1.4 },
-    camOffset: { x: 0, y: 9, z: 10 },
-    screwLiftHeight: 1.5,
+    basePos: { x: 0, y: -0.8, z: 0 },
+    explodeVec: { x: 0, y: -4.8, z: -0.5 }, // Se desplaza limpiamente hacia abajo
+    camOffset: { x: 0, y: 8, z: 11 },
+    screwLiftHeight: 1.4,
     screwCoords: [
       { x: -5.3, y: 0.14, z: -3.5, label: 'M2.5x5 [Sup-Izq]' },
       { x: 0.0,  y: 0.14, z: -3.5, label: 'M2.5x5 [Sup-Centro]' },
@@ -48,139 +40,139 @@ const HARDWARE_DB = [
       { x: 0.0,  y: 0.14, z: 3.5,  label: 'M2.5x5 [Inf-Centro]' },
       { x: 5.3,  y: 0.14, z: 3.5,  label: 'M2.5x5 [Inf-Der]' }
     ],
-    warning: 'Afloje los 8 tornillos cautivos siguiendo un patrón cruzado. Escuchará un "clic" metálico cuando el tornillo cautivo quede libre de la rosca.',
+    warning: 'Afloje los 8 tornillos cautivos en patrón diagonal antes de retirar la tapa inferior.',
     steps: [
-      'Apague el equipo, desconecte la corriente CA y retire cualquier tarjeta SD de la ranura.',
-      'Haga clic en cada uno de los 8 tornillos M2.5x5 del perímetro para desatornillarlos.',
-      'Inserte una herramienta plástica (spudger) desde las bisagras traseras para abrir los clips.',
-      'Levante la tapa inferior verticalmente para exponer el interior del equipo.'
+      'Apague el equipo y desconecte el cargador.',
+      'Afloje los 8 tornillos cautivos de la base inferior.',
+      'Use una púa plástica para liberar los clips de presión traseros.',
+      'Separe la tapa inferior hacia abajo.'
     ]
   },
   {
     id: 'battery',
     fru: 'DP/N: 06MT4T (62Wh)',
     name: 'Batería de Iones de Litio (4 Celdas)',
-    subtitle: 'Módulo primario de energía 7.6V / 62Wh',
-    screws: '3x Tornillos Phillips M2.0x3 (Marcados con grabado M2x3)',
+    subtitle: 'Polímero de Litio 7.6V / 62Wh',
+    screws: '3x Tornillos Phillips M2.0x3',
     stage: 'ETAPA 02',
-    basePos: { x: -1.6, y: 0.45, z: 2.35 },
-    explodeVec: { x: -1.2, y: 4.5, z: 3.5 },
-    camOffset: { x: -3.5, y: 6.5, z: 8.5 },
-    screwLiftHeight: 1.2,
+    basePos: { x: -1.6, y: 0.15, z: 2.2 },
+    explodeVec: { x: -1.2, y: 2.2, z: 3.2 },
+    camOffset: { x: -3.5, y: 6, z: 8 },
+    screwLiftHeight: 1.1,
     screwCoords: [
-      { x: -3.1, y: 0.24, z: -0.95, label: 'M2x3 [Pestaña Izq]' },
-      { x: 0.0,  y: 0.24, z: -0.95, label: 'M2x3 [Pestaña Central]' },
-      { x: 3.1,  y: 0.24, z: 0.95,  label: 'M2x3 [Pestaña Inf-Der]' }
+      { x: -3.1, y: 0.24, z: -0.95, label: 'M2x3 [Batería Izq]' },
+      { x: 0.0,  y: 0.24, z: -0.95, label: 'M2x3 [Batería Centro]' },
+      { x: 3.1,  y: 0.24, z: 0.95,  label: 'M2x3 [Batería Der]' }
     ],
-    warning: 'CRÍTICO: Desconecte el cable BATT1 de la placa base y retire los 3 tornillos M2x3 antes de levantar la batería.',
+    warning: 'CRÍTICO: Desconecte el cable de la batería BATT1 antes de manipular componentes internos.',
     steps: [
-      'Tire de la lengüeta del conector BATT1 hacia la batería para desconectarla de la placa base.',
-      'Desatornille los 3 tornillos Phillips M2x3 que sujetan el marco negro de la batería.',
-      'Levante la batería inclinándola hacia arriba desde el borde interior.'
+      'Desconecte el conector de alimentación BATT1 de la placa base.',
+      'Retire los 3 tornillos M2x3 que sujetan el chasis de la batería.',
+      'Extraiga la batería hacia arriba y hacia el frente.'
     ]
   },
   {
     id: 'storage',
     fru: 'SATA3 2.5" + M.2 2280',
     name: 'Unidades de Almacenamiento (HDD 2.5" y M.2 NVMe)',
-    subtitle: 'Caddy SATA de 2.5" + Ranura M.2 PCIe NVMe 2280',
-    screws: '4x Tornillos M2x3 (Caddy 2.5") + 1x Tornillo M2x3 (SSD M.2)',
+    subtitle: 'Bahía SATA III 2.5" + Ranura M.2 PCIe NVMe',
+    screws: '4x M2x3 (Caddy 2.5") + 1x M2x3 (SSD M.2)',
     stage: 'ETAPA 03',
-    basePos: { x: 3.3, y: 0.45, z: 2.1 },
-    explodeVec: { x: 3.2, y: 3.6, z: 2.8 },
-    camOffset: { x: 5.5, y: 5.5, z: 7.5 },
-    screwLiftHeight: 1.15,
+    basePos: { x: 3.2, y: 0.15, z: 2.1 },
+    explodeVec: { x: 3.0, y: 2.4, z: 2.5 },
+    camOffset: { x: 5.5, y: 5, z: 7 },
+    screwLiftHeight: 1.0,
     screwCoords: [
       { x: -1.2, y: 0.22, z: -0.95, label: 'M2x3 [Caddy Sup-Izq]' },
       { x: 1.75, y: 0.22, z: -0.95, label: 'M2x3 [Caddy Sup-Der]' },
       { x: -1.2, y: 0.22, z: 1.05,  label: 'M2x3 [Caddy Inf-Izq]' },
       { x: 1.75, y: 0.22, z: 1.05,  label: 'M2x3 [Caddy Inf-Der]' },
-      { x: -1.95, y: 0.1, z: 1.18,  label: 'M2x3 [Fijación SSD M.2]' }
+      { x: -1.95, y: 0.1, z: 1.18,  label: 'M2x3 [SSD M.2]' }
     ],
-    warning: 'No tire del cable plano SATA (interposer); abra primero el pestillo ZIF blanco en la placa base.',
+    warning: 'Evite doblar el cable interposer SATA al extraer el disco de 2.5 pulgadas.',
     steps: [
-      'Retire el tornillo único M2x3 del extremo inferior del SSD M.2 2280 y deslícelo fuera de la ranura.',
-      'Retire los 4 tornillos M2x3 que fijan el soporte metálico (caddy) de la unidad de 2.5 pulgadas.',
-      'Desconecte el cable adaptador SATA y levante el disco duro/SSD del chasis.'
+      'Retire el tornillo M2x3 del SSD M.2 y deslícelo fuera de la ranura.',
+      'Retire los 4 tornillos del caddy de 2.5" y levántelo con cuidado.',
+      'Desconecte el cable plano ZIF de la placa base.'
     ]
   },
   {
     id: 'ram',
     fru: '2x SODIMM (DDR4 / DDR3L)',
     name: 'Módulos de Memoria RAM (Dual-Channel SODIMM)',
-    subtitle: '2x Zócalos SODIMM con pestañas de eyección lateral (Sin tornillos)',
-    screws: '0 Tornillos (Mecanismo de resorte y pestañas laterales)',
+    subtitle: '2x Zócalos SODIMM 260-pin',
+    screws: '0 Tornillos (Pestañas de retención por muelle)',
     stage: 'ETAPA 03',
-    basePos: { x: 0.4, y: 0.45, z: 0.3 },
-    explodeVec: { x: 0.4, y: 3.1, z: 0.4 },
-    camOffset: { x: 2, y: 5, z: 5.5 },
-    screwLiftHeight: 1.0,
-    screwCoords: [], // Sin tornillos: extracción directa por pestañas
-    warning: 'Sujete los módulos SODIMM únicamente por los bordes verdes del PCB. Nunca toque los pines dorados.',
+    basePos: { x: 0.4, y: 0.18, z: 0.2 },
+    explodeVec: { x: 0.2, y: 2.8, z: 0.3 },
+    camOffset: { x: 2, y: 4.5, z: 5 },
+    screwLiftHeight: 0.9,
+    screwCoords: [],
+    warning: 'Mantenga los módulos por los cantos y evite tocar los pines dorados.',
     steps: [
-      'Separe hacia afuera los dos clips metálicos laterales de cada ranura SODIMM.',
-      'El módulo RAM se elevará automáticamente en un ángulo de 45°.',
-      'Retire el módulo tirando suavemente en ese mismo ángulo.'
+      'Separe hacia afuera los pestillos metálicos laterales de cada slot.',
+      'El módulo se elevará automáticamente a 45 grados.',
+      'Deslice el módulo hacia afuera.'
     ]
   },
   {
     id: 'wifi',
     fru: 'INTEL 8260NGW (M.2 2230)',
     name: 'Tarjeta de Red Inalámbrica Wi-Fi / WLAN',
-    subtitle: 'Intel Dual Band Wireless-AC 8260 + Abrazadera metálica',
-    screws: '1x Tornillo Phillips M2.0x3 (Abrazadera de antenas)',
+    subtitle: 'Intel Dual Band Wireless-AC 8260',
+    screws: '1x Tornillo Phillips M2.0x3 (Abrazadera)',
     stage: 'ETAPA 03',
-    basePos: { x: 4.3, y: 0.45, z: -1.6 },
-    explodeVec: { x: 3.8, y: 2.7, z: -1.8 },
-    camOffset: { x: 6, y: 4.5, z: -3.5 },
-    screwLiftHeight: 1.1,
+    basePos: { x: 4.1, y: 0.18, z: -1.5 },
+    explodeVec: { x: 3.5, y: 2.1, z: -1.8 },
+    camOffset: { x: 5.5, y: 4, z: -3 },
+    screwLiftHeight: 0.95,
     screwCoords: [
-      { x: 0.0, y: 0.14, z: -0.52, label: 'M2x3 [Abrazadera WLAN]' }
+      { x: 0.0, y: 0.14, z: -0.52, label: 'M2x3 [Abrazadera Wi-Fi]' }
     ],
-    warning: 'Desconecte los cables coaxiales blanco y negro levantándolos verticalmente tras quitar el tornillo de la abrazadera.',
+    warning: 'Desconecte los conectores coaxiales U.FL levantándolos verticalmente.',
     steps: [
-      'Desatornille el único tornillo M2x3 que asegura la placa metálica de retención.',
-      'Desconecte con cuidado los conectores U.FL de las antenas Principal (Blanco) y Auxiliar (Negro).',
-      'Deslice la tarjeta Wi-Fi hacia afuera del puerto M.2 Key-E.'
+      'Retire el tornillo M2x3 que sujeta la placa de protección de antenas.',
+      'Desconecte los cables coaxial blanco y negro.',
+      'Extraiga la tarjeta WLAN de la ranura M.2.'
     ]
   },
   {
     id: 'cooling',
     fru: 'DP/N: 085M9F',
     name: 'Sistema de Refrigeración (Heatsink & Blower Fan)',
-    subtitle: 'Disipador de cobre con secuencia de par 1-4 + Ventilador PWM',
-    screws: '4x Tornillos cautivos CPU (1-4) + 2x Tornillos M2x3 Ventilador',
+    subtitle: 'Disipador de cobre y ventilador centrífugo PWM',
+    screws: '4x Tornillos CPU (1-4) + 2x Tornillos M2x3 Ventilador',
     stage: 'ETAPA 04',
-    basePos: { x: -2.2, y: 0.48, z: -1.7 },
-    explodeVec: { x: -2.6, y: 2.2, z: -2.4 },
-    camOffset: { x: -5, y: 5.5, z: -4 },
-    screwLiftHeight: 1.15,
+    basePos: { x: -2.2, y: 0.22, z: -1.6 },
+    explodeVec: { x: -2.5, y: 3.5, z: -2.2 },
+    camOffset: { x: -5, y: 5, z: -4 },
+    screwLiftHeight: 1.1,
     screwCoords: [
-      { x: 0.65,  y: 0.08, z: -0.35, label: 'Tornillo CPU #1 (Cautivo)' },
-      { x: 2.05,  y: 0.08, z: 0.75,  label: 'Tornillo CPU #2 (Cautivo)' },
-      { x: 0.65,  y: 0.08, z: 0.75,  label: 'Tornillo CPU #3 (Cautivo)' },
-      { x: 2.05,  y: 0.08, z: -0.35, label: 'Tornillo CPU #4 (Cautivo)' },
+      { x: 0.65,  y: 0.08, z: -0.35, label: 'CPU #1 (Cautivo)' },
+      { x: 2.05,  y: 0.08, z: 0.75,  label: 'CPU #2 (Cautivo)' },
+      { x: 0.65,  y: 0.08, z: 0.75,  label: 'CPU #3 (Cautivo)' },
+      { x: 2.05,  y: 0.08, z: -0.35, label: 'CPU #4 (Cautivo)' },
       { x: -2.55, y: 0.22, z: -0.65, label: 'M2x3 [Ventilador Sup]' },
       { x: -0.25, y: 0.22, z: 1.25,  label: 'M2x3 [Ventilador Inf]' }
     ],
-    warning: 'Afloje los 4 tornillos del bloque de cobre de la CPU en orden inverso (4 → 3 → 2 → 1) para distribuir la presión sobre el silicio.',
+    warning: 'Afloje los 4 tornillos de la CPU en orden inverso (4 → 3 → 2 → 1).',
     steps: [
-      'Desconecte el cable de 4 pines del ventilador en el cabezal FAN1 de la placa base.',
-      'Retire los 2 tornillos M2x3 que sujetan la carcasa plástica del ventilador.',
-      'Afloje los 4 tornillos cautivos del bloque de cobre sobre la CPU y levante el conjunto térmico.'
+      'Desconecte el cable de 4 pines del ventilador de la placa base.',
+      'Retire los 2 tornillos del ventilador.',
+      'Afloje los 4 tornillos con resorte del bloque de la CPU en orden inverso.'
     ]
   },
   {
     id: 'motherboard',
     fru: 'DP/N: 0N8J4R (LA-C841P)',
     name: 'Placa Base Principal (System Motherboard)',
-    subtitle: 'PCB Multicapa con CPU Intel Skylake BGA1356 y puertos E/S',
-    screws: '6x Tornillos Phillips M2.0x3 (Serigrafiados con flecha blanca)',
+    subtitle: 'PCB con CPU Intel Skylake BGA1356 y PCH',
+    screws: '6x Tornillos Phillips M2.0x3',
     stage: 'ETAPA 05',
-    basePos: { x: 0, y: 0.0, z: -0.6 },
-    explodeVec: { x: 0, y: 0.3, z: 0 },
+    basePos: { x: 0, y: 0.0, z: -0.4 },
+    explodeVec: { x: 0, y: 4.8, z: 0 }, // Se eleva limpiamente en el eje Y central
     camOffset: { x: 0, y: 7.5, z: 5 },
-    screwLiftHeight: 1.25,
+    screwLiftHeight: 1.2,
     screwCoords: [
       { x: -4.6, y: 0.12, z: -2.1, label: 'M2x3 [PCB Sup-Izq]' },
       { x: 0.2,  y: 0.12, z: -2.1, label: 'M2x3 [PCB Sup-Centro]' },
@@ -189,35 +181,35 @@ const HARDWARE_DB = [
       { x: 1.8,  y: 0.12, z: 1.9,  label: 'M2x3 [PCB Inf-Centro]' },
       { x: 4.6,  y: 0.12, z: 1.9,  label: 'M2x3 [PCB Inf-Der]' }
     ],
-    warning: 'Verifique que el conector de pantalla eDP y todos los cables planos ZIF estén desconectados antes de retirar los 6 tornillos del PCB.',
+    warning: 'Asegúrese de haber desconectado el cable de video eDP y todos los buses ZIF.',
     steps: [
-      'Desconecte el conector de pantalla (eDP), el cable del puerto DC-In y los buses ZIF del touchpad/teclado.',
-      'Desatornille los 6 tornillos M2x3 distribuidos en el perímetro de la placa base.',
-      'Incline la placa base levantándola desde el borde derecho para liberar los puertos laterales del chasis.'
+      'Desconecte el cable de pantalla eDP y los conectores auxiliares.',
+      'Retire los 6 tornillos M2x3 de sujeción del circuito impreso.',
+      'Incline la placa base desde el lado derecho para liberarla de los puertos I/O.'
     ]
   },
   {
     id: 'palmrest',
     fru: 'DP/N: 019X5P',
     name: 'Teclado y Reposamuñecas (Palmrest & Keyboard Deck)',
-    subtitle: 'Chasis estructural de aleación de magnesio + Teclado retroiluminado',
-    screws: '4x Tornillos micro M1.6x2 (Bajo marco del teclado)',
+    subtitle: 'Chasis estructural de aleación de magnesio',
+    screws: '4x Tornillos micro M1.6x2',
     stage: 'ETAPA 06',
-    basePos: { x: 0, y: -0.65, z: 0 },
-    explodeVec: { x: 0, y: -3.6, z: 1.1 },
+    basePos: { x: 0, y: -0.4, z: 0 },
+    explodeVec: { x: 0, y: -2.2, z: 0.8 },
     camOffset: { x: 0, y: 5, z: 9 },
-    screwLiftHeight: 1.1,
+    screwLiftHeight: 1.0,
     screwCoords: [
       { x: -3.8, y: 0.18, z: -2.6, label: 'M1.6x2 [Teclado Izq]' },
-      { x: -1.2, y: 0.18, z: -2.6, label: 'M1.6x2 [Teclado Centro-Izq]' },
-      { x: 1.2,  y: 0.18, z: -2.6, label: 'M1.6x2 [Teclado Centro-Der]' },
+      { x: -1.2, y: 0.18, z: -2.6, label: 'M1.6x2 [Teclado C-Izq]' },
+      { x: 1.2,  y: 0.18, z: -2.6, label: 'M1.6x2 [Teclado C-Der]' },
       { x: 3.8,  y: 0.18, z: -2.6, label: 'M1.6x2 [Teclado Der]' }
     ],
-    warning: 'El marco embellecedor (lattice) del teclado debe desencajarse con una púa plástica antes de desatornillar el teclado.',
+    warning: 'El palmrest constituye la estructura principal del equipo.',
     steps: [
-      'Retire el marco plástico alrededor de las teclas haciendo palanca suave desde el borde superior.',
-      'Desatornille los tornillos micro M1.6 que aseguran la placa base del teclado al reposamuñecas.',
-      'Deslice el teclado hacia arriba y sepárelo del chasis de magnesio.'
+      'Retire el marco superior del teclado con una espátula plástica.',
+      'Desatornille los 4 microtornillos inferiores del teclado.',
+      'Separe el teclado y deje el chasis de magnesio expuesto.'
     ]
   }
 ];
@@ -232,14 +224,14 @@ class OpenTeardownManualApp {
 
     this.componentGroups = new Map();
     this.interactiveMeshes = [];
-    this.screwObjects = []; // Lista de todos los tornillos 3D con su estado cinemático
+    this.screwObjects = [];
 
     this.selectedId = null;
     this.hoveredObject = null;
     this.explodeProgress = 0;
     this.targetExplodeProgress = 0;
     this.isWireframe = false;
-    this.requireScrewLock = true; // Modo Manual: exige quitar tornillos antes de extraer pieza
+    this.requireScrewLock = true;
 
     this.camTargetPos = null;
     this.controlsTarget = new THREE.Vector3(0, 0, 0);
@@ -256,10 +248,10 @@ class OpenTeardownManualApp {
 
   initScene() {
     this.scene = new THREE.Scene();
-    this.scene.fog = new THREE.FogExp2(0x070a0f, 0.02);
+    this.scene.fog = new THREE.FogExp2(0x070a0f, 0.018);
 
-    this.camera = new THREE.PerspectiveCamera(42, window.innerWidth / window.innerHeight, 0.1, 200);
-    this.camera.position.set(13, 12, 16);
+    this.camera = new THREE.PerspectiveCamera(40, window.innerWidth / window.innerHeight, 0.1, 200);
+    this.camera.position.set(14, 12, 18);
 
     this.renderer = new THREE.WebGLRenderer({ antialias: true, powerPreference: 'high-performance' });
     this.renderer.setSize(window.innerWidth, window.innerHeight);
@@ -267,31 +259,32 @@ class OpenTeardownManualApp {
     this.renderer.shadowMap.enabled = true;
     this.renderer.shadowMap.type = THREE.PCFSoftShadowMap;
     this.renderer.toneMapping = THREE.ACESFilmicToneMapping;
-    this.renderer.toneMappingExposure = 1.2;
+    this.renderer.toneMappingExposure = 1.25;
     this.container.appendChild(this.renderer.domElement);
 
     this.controls = new OrbitControls(this.camera, this.renderer.domElement);
     this.controls.enableDamping = true;
-    this.controls.dampingFactor = 0.06;
-    this.controls.maxDistance = 42;
-    this.controls.minDistance = 3.5;
+    this.controls.dampingFactor = 0.05;
+    this.controls.maxDistance = 45;
+    this.controls.minDistance = 4;
 
-    // Iluminación de estudio técnico
-    this.scene.add(new THREE.AmbientLight(0xdbeafe, 0.8));
+    // Iluminación profesional de laboratorio CAD
+    this.scene.add(new THREE.AmbientLight(0xdbeafe, 0.85));
 
-    const keyLight = new THREE.DirectionalLight(0xffffff, 1.85);
-    keyLight.position.set(12, 22, 14);
+    const keyLight = new THREE.DirectionalLight(0xffffff, 1.9);
+    keyLight.position.set(15, 25, 16);
     keyLight.castShadow = true;
     keyLight.shadow.mapSize.set(2048, 2048);
     this.scene.add(keyLight);
 
-    const cyanRim = new THREE.DirectionalLight(0x00f0ff, 1.15);
-    cyanRim.position.set(-15, 8, -12);
+    const cyanRim = new THREE.DirectionalLight(0x00f0ff, 1.2);
+    cyanRim.position.set(-16, 8, -14);
     this.scene.add(cyanRim);
 
-    const grid = new THREE.GridHelper(36, 36, 0x00f0ff, 0x162234);
-    grid.position.y = -5.5;
-    grid.material.opacity = 0.35;
+    // Cuadrícula CAD de suelo
+    const grid = new THREE.GridHelper(40, 40, 0x00f0ff, 0x141e2c);
+    grid.position.y = -6.2;
+    grid.material.opacity = 0.3;
     grid.material.transparent = true;
     this.scene.add(grid);
 
@@ -305,9 +298,6 @@ class OpenTeardownManualApp {
     this.pointer = new THREE.Vector2();
   }
 
-  /**
-   * Crea las geometrías reutilizables para los Tornillos Phillips 3D (Cabeza, Rosca y Ranura en Cruz)
-   */
   buildSharedScrewGeometries() {
     this.screwHeadGeo = new THREE.CylinderGeometry(0.16, 0.16, 0.07, 16);
     this.screwShaftGeo = new THREE.CylinderGeometry(0.065, 0.055, 0.28, 12);
@@ -317,9 +307,6 @@ class OpenTeardownManualApp {
     this.washerRingGeo.rotateX(-Math.PI / 2);
   }
 
-  /**
-   * Instancia un tornillo 3D interactivo con cabeza Phillips, rosca helicoidal y línea guía roja/ámbar
-   */
   createScrewAssembly(compId, screwDef, index) {
     const screwGroup = new THREE.Group();
     screwGroup.position.set(screwDef.x, screwDef.y, screwDef.z);
@@ -329,49 +316,44 @@ class OpenTeardownManualApp {
       roughness: 0.2,
       metalness: 0.92,
       emissive: 0xffb800,
-      emissiveIntensity: 0.18
+      emissiveIntensity: 0.2
     });
-    const slotMat = new THREE.MeshBasicMaterial({ color: 0x090d14 });
+    const slotMat = new THREE.MeshBasicMaterial({ color: 0x070a0f });
     const shaftMat = new THREE.MeshStandardMaterial({ color: 0x94a3b8, roughness: 0.35, metalness: 0.85 });
 
-    // Cabeza cilíndrica del tornillo
     const headMesh = new THREE.Mesh(this.screwHeadGeo, headMat);
     headMesh.position.y = 0.04;
     screwGroup.add(headMesh);
 
-    // Ranura en cruz Phillips (+) para que se aprecie el giro de 1080° al desatornillar
     const slot1 = new THREE.Mesh(this.screwSlotGeo1, slotMat);
     slot1.position.y = 0.075;
     const slot2 = new THREE.Mesh(this.screwSlotGeo2, slotMat);
     slot2.position.y = 0.075;
     screwGroup.add(slot1, slot2);
 
-    // Cuerpo roscado inferior
     const shaftMesh = new THREE.Mesh(this.screwShaftGeo, shaftMat);
     shaftMesh.position.y = -0.12;
     screwGroup.add(shaftMesh);
 
-    // Halo indicador sobre la placa donde encaja el tornillo
     const ringMat = new THREE.MeshBasicMaterial({
       color: 0xffb800,
       side: THREE.DoubleSide,
       transparent: true,
-      opacity: 0.55
+      opacity: 0.6
     });
     const locatorRing = new THREE.Mesh(this.washerRingGeo, ringMat);
     locatorRing.position.set(screwDef.x, screwDef.y - 0.01, screwDef.z);
 
-    // Línea de trayectoria vertical del tornillo (se estira al desatornillarse)
     const trailGeo = new THREE.BufferGeometry().setFromPoints([
       new THREE.Vector3(screwDef.x, screwDef.y, screwDef.z),
       new THREE.Vector3(screwDef.x, screwDef.y, screwDef.z)
     ]);
     const trailMat = new THREE.LineDashedMaterial({
       color: 0xff3366,
-      dashSize: 0.1,
+      dashSize: 0.12,
       gapSize: 0.06,
       transparent: true,
-      opacity: 0.85
+      opacity: 0.9
     });
     const trailLine = new THREE.Line(trailGeo, trailMat);
     trailLine.computeLineDistances();
@@ -385,12 +367,11 @@ class OpenTeardownManualApp {
       headMesh,
       locatorRing,
       trailLine,
-      unscrewedManual: false, // Estado cuando el usuario lo quita con clic
-      currentProgress: 0,     // 0 = apretado, 1 = totalmente fuera de la rosca
+      unscrewedManual: false,
+      currentProgress: 0,
       targetProgress: 0
     };
 
-    // Etiquetar mallas del tornillo para que el Raycaster las distinga de la pieza
     screwGroup.traverse((child) => {
       if (child.isMesh) {
         child.userData.isScrew = true;
@@ -405,17 +386,17 @@ class OpenTeardownManualApp {
 
   buildHardwareGeometry() {
     const mats = {
-      chassisDark: new THREE.MeshStandardMaterial({ color: 0x1e242b, roughness: 0.55, metalness: 0.35 }),
-      magnesium: new THREE.MeshStandardMaterial({ color: 0x2a313c, roughness: 0.4, metalness: 0.65 }),
-      pcbBlue: new THREE.MeshStandardMaterial({ color: 0x0b4f6c, roughness: 0.35, metalness: 0.25 }),
-      pcbGreen: new THREE.MeshStandardMaterial({ color: 0x0f5e36, roughness: 0.35, metalness: 0.2 }),
-      pcbBlack: new THREE.MeshStandardMaterial({ color: 0x15181e, roughness: 0.4, metalness: 0.3 }),
-      copper: new THREE.MeshStandardMaterial({ color: 0xd97736, roughness: 0.25, metalness: 0.88 }),
-      gold: new THREE.MeshStandardMaterial({ color: 0xf5b700, roughness: 0.2, metalness: 0.95 }),
-      aluminum: new THREE.MeshStandardMaterial({ color: 0xadb5bd, roughness: 0.3, metalness: 0.85 }),
-      icChip: new THREE.MeshStandardMaterial({ color: 0x111317, roughness: 0.25, metalness: 0.4 }),
-      batteryBlack: new THREE.MeshStandardMaterial({ color: 0x12151a, roughness: 0.65, metalness: 0.15 }),
-      siliconDie: new THREE.MeshStandardMaterial({ color: 0x3b82f6, roughness: 0.1, metalness: 0.9 })
+      chassisDark: new THREE.MeshStandardMaterial({ color: 0x1e242b, roughness: 0.5, metalness: 0.4 }),
+      magnesium: new THREE.MeshStandardMaterial({ color: 0x2a313c, roughness: 0.38, metalness: 0.7 }),
+      pcbBlue: new THREE.MeshStandardMaterial({ color: 0x0b4f6c, roughness: 0.32, metalness: 0.3 }),
+      pcbGreen: new THREE.MeshStandardMaterial({ color: 0x0f5e36, roughness: 0.32, metalness: 0.25 }),
+      pcbBlack: new THREE.MeshStandardMaterial({ color: 0x14171d, roughness: 0.4, metalness: 0.3 }),
+      copper: new THREE.MeshStandardMaterial({ color: 0xd97736, roughness: 0.22, metalness: 0.9 }),
+      gold: new THREE.MeshStandardMaterial({ color: 0xf5b700, roughness: 0.18, metalness: 0.95 }),
+      aluminum: new THREE.MeshStandardMaterial({ color: 0xadb5bd, roughness: 0.28, metalness: 0.88 }),
+      icChip: new THREE.MeshStandardMaterial({ color: 0x111317, roughness: 0.22, metalness: 0.45 }),
+      batteryBlack: new THREE.MeshStandardMaterial({ color: 0x12151a, roughness: 0.6, metalness: 0.2 }),
+      siliconDie: new THREE.MeshStandardMaterial({ color: 0x3b82f6, roughness: 0.08, metalness: 0.95 })
     };
 
     HARDWARE_DB.forEach((item) => {
@@ -440,7 +421,6 @@ class OpenTeardownManualApp {
         case 'palmrest':    this.createPalmrest(group, mats); break;
       }
 
-      // Configurar mallas de la pieza electrónica
       group.traverse((child) => {
         if (child.isMesh && !child.userData.isScrew) {
           child.material = child.material.clone();
@@ -452,13 +432,12 @@ class OpenTeardownManualApp {
           const edges = new THREE.EdgesGeometry(child.geometry, 35);
           const line = new THREE.LineSegments(
             edges,
-            new THREE.LineBasicMaterial({ color: 0x00f0ff, transparent: true, opacity: 0.16 })
+            new THREE.LineBasicMaterial({ color: 0x00f0ff, transparent: true, opacity: 0.2 })
           );
           child.add(line);
         }
       });
 
-      // Instanciar y acoplar todos los Tornillos 3D de esta capa
       item.screwCoords.forEach((sDef, idx) => {
         const { screwGroup, locatorRing, trailLine, screwRecord } = this.createScrewAssembly(item.id, sDef, idx);
         group.add(screwGroup);
@@ -470,14 +449,13 @@ class OpenTeardownManualApp {
       this.rootLaptopGroup.add(group);
       this.componentGroups.set(item.id, group);
 
-      // Línea guía principal del módulo
       const lineGeo = new THREE.BufferGeometry().setFromPoints([
         new THREE.Vector3(item.basePos.x, item.basePos.y, item.basePos.z),
         new THREE.Vector3(item.basePos.x, item.basePos.y, item.basePos.z)
       ]);
       const guideLine = new THREE.Line(
         lineGeo,
-        new THREE.LineDashedMaterial({ color: 0x00ff9d, dashSize: 0.25, gapSize: 0.15, transparent: true, opacity: 0.6 })
+        new THREE.LineDashedMaterial({ color: 0x00ff9d, dashSize: 0.25, gapSize: 0.15, transparent: true, opacity: 0.65 })
       );
       guideLine.computeLineDistances();
       guideLine.userData.compId = item.id;
@@ -595,9 +573,6 @@ class OpenTeardownManualApp {
     group.add(touchpad);
   }
 
-  /**
-   * Inicializa el buscador superior para cambiar de modelo de laptop en tiempo real
-   */
   initSearchCatalog() {
     const input = document.getElementById('model-search');
     const dropdown = document.getElementById('search-results');
@@ -618,45 +593,26 @@ class OpenTeardownManualApp {
       });
     };
 
-    input.addEventListener('focus', () => {
-      renderList(input.value);
-      dropdown.classList.remove('hidden');
-    });
-
-    input.addEventListener('input', () => {
-      renderList(input.value);
-      dropdown.classList.remove('hidden');
-    });
+    input.addEventListener('focus', () => { renderList(input.value); dropdown.classList.remove('hidden'); });
+    input.addEventListener('input', () => { renderList(input.value); dropdown.classList.remove('hidden'); });
 
     document.addEventListener('click', (e) => {
-      if (!e.target.closest('.search-catalog-box')) {
-        dropdown.classList.add('hidden');
-      }
+      if (!e.target.closest('.search-catalog-box')) dropdown.classList.add('hidden');
     });
   }
 
   loadLaptopProfile(profileKey) {
     const profile = CATALOG_DB[profileKey];
     if (!profile) return;
-
-    document.getElementById('current-model-title').innerHTML =
-      `${profile.modelName} <span class="accent-text">SERVICE MANUAL</span>`;
-
-    // Ajustar proporciones del chasis y reiniciar estado de tornillos
-    this.rootLaptopGroup.scale.set(
-      profile.chassisScale.x,
-      profile.chassisScale.y,
-      profile.chassisScale.z
-    );
-
+    document.getElementById('current-model-title').innerHTML = `${profile.modelName} <span class="accent-text">SERVICE MANUAL</span>`;
+    this.rootLaptopGroup.scale.set(profile.chassisScale.x, profile.chassisScale.y, profile.chassisScale.z);
     this.resetAllScrewsAndLayers();
-    this.showToast(`Manual técnico cargado: ${profile.modelName}`);
+    this.showToast(`Manual cargado: ${profile.modelName}`);
   }
 
   initUI() {
     this.renderLayerList();
 
-    // Slider de despiece global (anima tornillos primero y luego capas)
     this.slider.addEventListener('input', (e) => {
       this.setExplodeLevel(parseFloat(e.target.value));
     });
@@ -669,56 +625,39 @@ class OpenTeardownManualApp {
       });
     });
 
-    // Interruptor Modo Destornillador (Bloqueo mecánico de tornillos)
     const btnScrewMode = document.getElementById('btn-screw-mode');
     btnScrewMode.addEventListener('click', () => {
       this.requireScrewLock = !this.requireScrewLock;
       btnScrewMode.classList.toggle('active', this.requireScrewLock);
-      btnScrewMode.textContent = this.requireScrewLock
-        ? '[ MODO DESTORNILLADOR: ON ]'
-        : '[ MODO DESTORNILLADOR: OFF ]';
-      this.showToast(
-        this.requireScrewLock
-          ? 'Modo Manual Activo: Haz clic en los tornillos 3D para liberar cada pieza.'
-          : 'Modo Libre: Puedes extraer piezas sin desatornillar primero.'
-      );
+      btnScrewMode.textContent = this.requireScrewLock ? '[ MODO DESTORNILLADOR: ON ]' : '[ MODO DESTORNILLADOR: OFF ]';
+      this.showToast(this.requireScrewLock ? 'Modo Manual Activo: Desatornille primero.' : 'Modo Libre activo.');
       if (this.selectedId) this.updateInspectorScrewUI(this.selectedId);
     });
 
-    // Botón Rayos X / Wireframe
     const btnWire = document.getElementById('btn-wireframe');
     btnWire.addEventListener('click', () => {
       this.isWireframe = !this.isWireframe;
       btnWire.classList.toggle('active', this.isWireframe);
       this.interactiveMeshes.forEach((mesh) => {
-        if (!mesh.userData.isScrew) {
-          mesh.material.wireframe = this.isWireframe;
-        }
+        if (!mesh.userData.isScrew) mesh.material.wireframe = this.isWireframe;
       });
     });
 
-    // Botón Reiniciar Todo
-    document.getElementById('btn-reset-cam').addEventListener('click', () => {
-      this.resetAllScrewsAndLayers();
-    });
-
+    document.getElementById('btn-reset-cam').addEventListener('click', () => this.resetAllScrewsAndLayers());
     document.getElementById('btn-close-inspector').addEventListener('click', () => {
       this.selectedId = null;
       document.getElementById('inspector-panel').classList.add('collapsed');
       this.refreshHighlights();
     });
 
-    // Botón en el panel lateral: Desatornillar todos los tornillos de la pieza seleccionada
     document.getElementById('btn-unscrew-part').addEventListener('click', () => {
       if (!this.selectedId) return;
       const group = this.componentGroups.get(this.selectedId);
       const records = group.userData.screwRecords;
-
       if (records.length === 0) {
-        this.showToast('Este módulo utiliza clips de retención sin tornillos.');
+        this.showToast('Este módulo utiliza clips sin tornillos.');
         return;
       }
-
       const allUnscrewed = records.every((r) => r.unscrewedManual);
       records.forEach((r, idx) => {
         setTimeout(() => {
@@ -727,11 +666,10 @@ class OpenTeardownManualApp {
           this.updateGlobalScrewCounter();
           this.updateInspectorScrewUI(this.selectedId);
           this.renderLayerList();
-        }, idx * 110); // Desatornillado secuencial realista
+        }, idx * 100);
       });
     });
 
-    // Botón en el panel lateral: Extraer / Separar únicamente la pieza seleccionada
     document.getElementById('btn-extract-part').addEventListener('click', () => {
       if (!this.selectedId) return;
       const group = this.componentGroups.get(this.selectedId);
@@ -780,28 +718,14 @@ class OpenTeardownManualApp {
     });
   }
 
-  /**
-   * Al hacer clic en un tornillo 3D individual, lo gira 1080° y lo extrae de su rosca
-   */
   toggleSingleScrew(screwRecord) {
     screwRecord.unscrewedManual = !screwRecord.unscrewedManual;
     screwRecord.targetProgress = screwRecord.unscrewedManual ? 1 : 0;
 
-    // Seleccionar automáticamente el componente al que pertenece ese tornillo
     if (this.selectedId !== screwRecord.compId) {
       this.selectComponent(screwRecord.compId, false);
     } else {
       this.updateInspectorScrewUI(screwRecord.compId);
-    }
-
-    const group = this.componentGroups.get(screwRecord.compId);
-    const records = group.userData.screwRecords;
-    const removedCount = records.filter((r) => r.unscrewedManual).length;
-
-    if (removedCount === records.length && records.length > 0) {
-      this.showToast(`¡Todos los tornillos de ${group.userData.info.name.split('(')[0]} extraídos! Pieza liberada.`);
-    } else {
-      this.showToast(`${screwRecord.label}: ${screwRecord.unscrewedManual ? 'DESATORNILLADO' : 'ATORNILLADO'} (${removedCount}/${records.length})`);
     }
 
     this.updateGlobalScrewCounter();
@@ -833,8 +757,7 @@ class OpenTeardownManualApp {
           const sRec = hitMesh.userData.screwRecord;
           this.setHoveredObject(sRec);
           document.getElementById('tooltip-badge').textContent = '🔩 TORNILLO';
-          document.getElementById('tooltip-text').textContent =
-            `${sRec.label} (${sRec.unscrewedManual ? 'Clic para atornillar' : 'Clic para desatornillar'})`;
+          document.getElementById('tooltip-text').textContent = `${sRec.label}`;
         } else {
           const group = hitMesh.userData.parentGroup;
           this.setHoveredObject(group);
@@ -881,7 +804,6 @@ class OpenTeardownManualApp {
     this.selectedId = id;
     const group = this.componentGroups.get(id);
     if (!group) return;
-
     const info = group.userData.info;
 
     document.getElementById('insp-id').textContent = info.fru;
@@ -911,52 +833,38 @@ class OpenTeardownManualApp {
         currentWorldPos.z + info.camOffset.z
       );
     }
-
     this.refreshHighlights();
   }
 
   updateInspectorScrewUI(id) {
     const group = this.componentGroups.get(id);
     if (!group) return;
-
     const records = group.userData.screwRecords;
     const removedCount = records.filter((r) => r.unscrewedManual || this.targetExplodeProgress > 0.25).length;
     const total = records.length;
     const allCleared = total === 0 || removedCount === total || !this.requireScrewLock;
 
     const badge = document.getElementById('insp-screw-progress');
-    badge.textContent = total === 0 ? 'SIN TORNILLOS (CLIPS)' : `${removedCount} / ${total} EXTRAÍDOS`;
+    badge.textContent = total === 0 ? 'SIN TORNILLOS' : `${removedCount} / ${total} EXTRAÍDOS`;
     badge.classList.toggle('complete', allCleared);
 
     const btnUnscrew = document.getElementById('btn-unscrew-part');
-    btnUnscrew.textContent = removedCount === total && total > 0
-      ? '🔩 VOLVER A ATORNILLAR'
-      : `🔩 DESATORNILLAR (${total})`;
+    btnUnscrew.textContent = removedCount === total && total > 0 ? '🔩 RE-ATORNILLAR' : `🔩 DESATORNILLAR (${total})`;
 
     const btnExtract = document.getElementById('btn-extract-part');
     btnExtract.disabled = !allCleared;
-    btnExtract.textContent = group.userData.manualExtracted
-      ? '⬇ REINSTALAR EN CHASIS'
-      : '⬆ EXTRAER COMPONENTE';
+    btnExtract.textContent = group.userData.manualExtracted ? '⬇ INSTALAR' : '⬆ EXTRAER PIEZA';
   }
 
   resetAllScrewsAndLayers() {
     this.selectedId = null;
     this.slider.value = 0;
     this.setExplodeLevel(0);
-
-    this.screwObjects.forEach((s) => {
-      s.unscrewedManual = false;
-      s.targetProgress = 0;
-    });
-
-    this.componentGroups.forEach((group) => {
-      group.userData.manualExtracted = false;
-    });
-
+    this.screwObjects.forEach((s) => { s.unscrewedManual = false; s.targetProgress = 0; });
+    this.componentGroups.forEach((group) => { group.userData.manualExtracted = false; });
     document.getElementById('inspector-panel').classList.add('collapsed');
     this.controlsTarget.set(0, 0, 0);
-    this.camTargetPos = new THREE.Vector3(13, 12, 16);
+    this.camTargetPos = new THREE.Vector3(14, 12, 18);
     this.updateGlobalScrewCounter();
     this.renderLayerList();
     this.refreshHighlights();
@@ -966,16 +874,13 @@ class OpenTeardownManualApp {
     document.getElementById('toast-msg').textContent = msg;
     this.toastBanner.classList.remove('hidden');
     clearTimeout(this.toastTimer);
-    this.toastTimer = setTimeout(() => {
-      this.toastBanner.classList.add('hidden');
-    }, 3400);
+    this.toastTimer = setTimeout(() => this.toastBanner.classList.add('hidden'), 3200);
   }
 
   refreshHighlights() {
     this.componentGroups.forEach((group, id) => {
       const isSelected = id === this.selectedId;
       const isHoveredGroup = this.hoveredObject === group;
-
       group.traverse((child) => {
         if (child.isMesh && !child.userData.isScrew) {
           if (isSelected) {
@@ -992,15 +897,14 @@ class OpenTeardownManualApp {
       });
     });
 
-    // Resaltado especial de tornillos individuales
     this.screwObjects.forEach((sRec) => {
-      const isHoveredScrew = this.hoveredObject === sRec;
-      if (isHoveredScrew) {
+      const isHovered = this.hoveredObject === sRec;
+      if (isHovered) {
         sRec.headMesh.material.emissive.setHex(0x00f0ff);
         sRec.headMesh.material.emissiveIntensity = 0.9;
       } else if (sRec.unscrewedManual) {
         sRec.headMesh.material.emissive.setHex(0x00ff9d);
-        sRec.headMesh.material.emissiveIntensity = 0.65;
+        sRec.headMesh.material.emissiveIntensity = 0.6;
       } else {
         sRec.headMesh.material.emissive.setHex(0xffb800);
         sRec.headMesh.material.emissiveIntensity = 0.22;
@@ -1008,35 +912,23 @@ class OpenTeardownManualApp {
     });
   }
 
-  /**
-   * Bucle de Animación:
-   * - Fase 1 del Slider (0.0 a 0.30): Gira y extrae automáticamente todos los tornillos.
-   * - Fase 2 del Slider (0.30 a 1.0): Separa las capas electrónicas una vez fuera los tornillos.
-   * - También soporta extracción individual de tornillos y piezas mediante clics.
-   */
   animate() {
     requestAnimationFrame(() => this.animate());
 
     this.explodeProgress += (this.targetExplodeProgress - this.explodeProgress) * 0.08;
 
-    // 1. Progreso global de tornillos por el slider (0% -> 30% del slider desatornilla todo)
-    const sliderScrewFactor = THREE.MathUtils.clamp(this.explodeProgress / 0.30, 0, 1);
-    // 2. Progreso global de separación de placas (30% -> 100% del slider separa las capas)
-    const sliderLayerFactor = THREE.MathUtils.clamp((this.explodeProgress - 0.30) / 0.70, 0, 1);
+    const sliderScrewFactor = THREE.MathUtils.clamp(this.explodeProgress / 0.28, 0, 1);
+    const sliderLayerFactor = THREE.MathUtils.clamp((this.explodeProgress - 0.28) / 0.72, 0, 1);
 
-    // Animar cada tornillo 3D (Rotación helicoidal de 3 vueltas = 6*PI radianes + Elevación axial Y)
     this.screwObjects.forEach((sRec) => {
       const compInfo = this.componentGroups.get(sRec.compId).userData.info;
       const desiredScrewState = Math.max(sRec.targetProgress, sliderScrewFactor);
-
       sRec.currentProgress += (desiredScrewState - sRec.currentProgress) * 0.12;
 
       const liftY = sRec.currentProgress * compInfo.screwLiftHeight;
       sRec.group.position.y = sRec.baseLocalPos.y + liftY;
-      // Giro realista antihorario al salir de la rosca
       sRec.group.rotation.y = sRec.currentProgress * Math.PI * 6;
 
-      // Actualizar línea guía roja/ámbar entre el orificio de la placa y el tornillo elevado
       const posAttr = sRec.trailLine.geometry.attributes.position;
       posAttr.setXYZ(0, sRec.baseLocalPos.x, sRec.baseLocalPos.y, sRec.baseLocalPos.z);
       posAttr.setXYZ(1, sRec.baseLocalPos.x, sRec.baseLocalPos.y + liftY, sRec.baseLocalPos.z);
@@ -1045,10 +937,9 @@ class OpenTeardownManualApp {
       sRec.trailLine.visible = sRec.currentProgress > 0.04;
     });
 
-    // Animar posición de cada capa electrónica (combina el slider global + extracción manual individual)
     this.componentGroups.forEach((group) => {
       const info = group.userData.info;
-      const targetLocalExtract = group.userData.manualExtracted ? 0.65 : 0;
+      const targetLocalExtract = group.userData.manualExtracted ? 0.75 : 0;
       group.userData.localExtractOffset += (targetLocalExtract - group.userData.localExtractOffset) * 0.09;
 
       const effectiveExplosion = Math.max(sliderLayerFactor, group.userData.localExtractOffset);
@@ -1058,7 +949,6 @@ class OpenTeardownManualApp {
       group.position.z = info.basePos.z + info.explodeVec.z * effectiveExplosion;
     });
 
-    // Actualizar líneas guía verdes entre capas
     this.guideLinesGroup.children.forEach((line) => {
       const compGroup = this.componentGroups.get(line.userData.compId);
       if (compGroup) {
@@ -1068,23 +958,19 @@ class OpenTeardownManualApp {
         posAttr.setXYZ(1, compGroup.position.x, compGroup.position.y, compGroup.position.z);
         posAttr.needsUpdate = true;
         line.computeLineDistances();
-        line.visible = compGroup.position.distanceTo(new THREE.Vector3(info.basePos.x, info.basePos.y, info.basePos.z)) > 0.15;
+        line.visible = compGroup.position.distanceTo(new THREE.Vector3(info.basePos.x, info.basePos.y, info.basePos.z)) > 0.12;
       }
     });
 
     if (this.selectedId) {
       const activeGroup = this.componentGroups.get(this.selectedId);
-      if (activeGroup) {
-        this.controlsTarget.copy(activeGroup.position);
-      }
+      if (activeGroup) this.controlsTarget.copy(activeGroup.position);
     }
 
     this.controls.target.lerp(this.controlsTarget, 0.08);
     if (this.camTargetPos) {
       this.camera.position.lerp(this.camTargetPos, 0.06);
-      if (this.camera.position.distanceTo(this.camTargetPos) < 0.18) {
-        this.camTargetPos = null;
-      }
+      if (this.camera.position.distanceTo(this.camTargetPos) < 0.18) this.camTargetPos = null;
     }
 
     this.controls.update();
