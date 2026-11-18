@@ -1,0 +1,159 @@
+
+
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>OPEN TEARDOWN CAD // Manual Interactivo de Desensamblaje en Tiempo Real</title>
+  
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&family=Space+Grotesk:wght@400;600;700&display=swap" rel="stylesheet">
+  
+  <link rel="stylesheet" href="css/styles.css">
+
+  <script type="importmap">
+    {
+      "imports": {
+        "three": "https://unpkg.com/three@0.160.0/build/three.module.js",
+        "three/addons/": "https://unpkg.com/three@0.160.0/examples/jsm/"
+      }
+    }
+  </script>
+</head>
+<body>
+
+  <!-- Lienzo 3D -->
+  <div id="webgl-container"></div>
+
+  <!-- Tooltip Flotante 3D (Detecta Piezas y Tornillos individuales) -->
+  <div id="hover-tooltip" class="hidden">
+    <span id="tooltip-badge" class="tooltip-code">MOD</span>
+    <span id="tooltip-text" class="tooltip-name">Elemento</span>
+  </div>
+
+  <!-- Notificación Toast Flotante para Guía del Usuario -->
+  <div id="toast-banner" class="toast-banner hidden">
+    <span id="toast-msg">Mensaje del sistema</span>
+  </div>
+
+  <!-- BARRA SUPERIOR: Buscador de Modelos y Controles CAD -->
+  <header class="hud-header glass-panel">
+    <div class="brand-block">
+      <div class="status-led"></div>
+      <div>
+        <span class="sys-tag">OPEN HARDWARE MANUAL // CAD ENGINE v2.4</span>
+        <h1 id="current-model-title">DELL LATITUDE E5570 <span class="accent-text">SERVICE MANUAL</span></h1>
+      </div>
+    </div>
+
+    <!-- Buscador Universal de Equipos -->
+    <div class="search-catalog-box">
+      <div class="search-input-wrap">
+        <span class="search-icon">⌕</span>
+        <input type="text" id="model-search" placeholder="Buscar equipo (ej. Latitude E5570, E5470, ThinkPad)..." autocomplete="off">
+      </div>
+      <ul id="search-results" class="search-dropdown hidden">
+        <!-- Inyectado dinámicamente desde el catálogo -->
+      </ul>
+    </div>
+
+    <div class="header-actions">
+      <button id="btn-screw-mode" class="cyber-btn active" title="Exigir desatornillar con clic antes de extraer la pieza">
+        [ MODO DESTORNILLADOR: ON ]
+      </button>
+      <button id="btn-wireframe" class="cyber-btn" title="Alternar Malla Técnica">
+        [ RAYOS X / CAD ]
+      </button>
+      <button id="btn-reset-cam" class="cyber-btn" title="Restaurar Vista General">
+        [ REINICIAR ]
+      </button>
+    </div>
+  </header>
+
+  <!-- PANEL IZQUIERDO: Secuencia Oficial de Desensamblaje -->
+  <nav class="layer-index glass-panel">
+    <div class="panel-header-mini">
+      <span>ORDEN DEL MANUAL (CAPAS)</span>
+      <span id="global-screw-counter" class="screw-pill">🔩 0/0</span>
+    </div>
+    <ul id="component-list" class="comp-list">
+      <!-- Generado dinámicamente -->
+    </ul>
+    <div class="manual-hint">
+      <strong>💡 MODO INTERACTIVO:</strong> Haz clic directamente sobre los <b>tornillos brillantes</b> en el modelo 3D para girarlos y extraerlos uno por uno.
+    </div>
+  </nav>
+
+  <!-- PANEL LATERAL DERECHO: Manual Paso a Paso y Control de Tornillos -->
+  <aside id="inspector-panel" class="inspector-panel glass-panel collapsed">
+    <div class="inspector-top-bar">
+      <span id="insp-id" class="mono-badge">FRU: 00000</span>
+      <button id="btn-close-inspector" class="close-btn" title="Cerrar Panel">✕</button>
+    </div>
+
+    <h2 id="insp-title">Seleccione un Componente</h2>
+    <p id="insp-subtitle" class="insp-subtitle">Haga clic sobre una pieza o tornillo en el visor 3D</p>
+
+    <!-- Estado interactivo de Tornillería de la pieza actual -->
+    <div class="screw-interactive-box">
+      <div class="screw-box-header">
+        <span class="spec-label">ESTADO DE TORNILLERÍA Y FIJACIÓN</span>
+        <span id="insp-screw-progress" class="screw-progress-badge">0 / 0 EXTRAÍDOS</span>
+      </div>
+      <p id="insp-screws" class="screw-spec-text">—</p>
+      
+      <!-- Botones de acción directa sobre los tornillos de la pieza -->
+      <div class="screw-action-row">
+        <button id="btn-unscrew-part" class="action-btn-neon">
+          🔩 DESATORNILLAR PIEZA (ANIMAR)
+        </button>
+        <button id="btn-extract-part" class="action-btn-secondary" disabled>
+          ⬆ EXTRAER COMPONENTE
+        </button>
+      </div>
+    </div>
+
+    <div class="warning-banner">
+      <div class="warning-icon">⚡</div>
+      <div class="warning-content">
+        <strong>PRECAUCIÓN DE SERVICIO TÉCNICO</strong>
+        <p id="insp-warning">—</p>
+      </div>
+    </div>
+
+    <div class="steps-section">
+      <h3>GUÍA DE DESENSAMBLAJE DETALLADA</h3>
+      <ol id="insp-steps" class="steps-list">
+        <!-- Pasos inyectados por JS -->
+      </ol>
+    </div>
+  </aside>
+
+  <!-- CONTROLES INFERIORES: Línea de Tiempo Cinemática (Tornillos + Capas) -->
+  <footer class="hud-footer glass-panel">
+    <div class="stage-buttons">
+      <button class="stage-btn active" data-val="0">01. ENSAMBLADO</button>
+      <button class="stage-btn" data-val="18">02. EXTRAER TORNILLOS</button>
+      <button class="stage-btn" data-val="55">03. ABRIR CHASIS Y BATERÍA</button>
+      <button class="stage-btn" data-val="100">04. DESPIECE COMPLETO (TORNILLOS + CAPAS)</button>
+    </div>
+
+    <div class="slider-wrapper">
+      <span class="slider-tag">LÍNEA DE TIEMPO DEL MANUAL</span>
+      <input type="range" id="teardown-slider" min="0" max="100" value="0" step="0.5">
+      <span id="slider-readout" class="slider-readout">0%</span>
+    </div>
+  </footer>
+
+  <script type="module" src="js/app.js"></script>
+</body>
+</html>
+
+
+
+
+
+
+
